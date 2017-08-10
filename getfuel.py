@@ -2,11 +2,9 @@
 
 import os
 import re
-# from cs50 import SQL
 import requests
 import json
 import sqlite3
-
 
 
 """ AIMS:
@@ -25,6 +23,7 @@ def main():
     # pipe input to reference.json
     
     ### TO DO TO DO ###
+    # use manual file to start with. This isn't too hard - do the hard db stuff first
     
                                                     ## 2. Create/open DB, open file, add data to tables
     
@@ -40,7 +39,8 @@ def main():
     c = conn.cursor()
     
     # load up json file
-    ref_data = json.load(open('static/reference.json'))
+    ref_data = json.load(open('data/reference.json'))
+
     
     ## Insert brands
     # create empty table 'brands if not there already'
@@ -86,24 +86,34 @@ def main():
                 'code' INTEGER PRIMARY KEY,
                 'name' TEXT NOT NULL,
                 'address' TEXT NOT NULL,
-                'latitude' REAL NOT NULL,
-                'longitude' REAL NOT NULL)''')
-    
+                'suburb' TEXT NOT NULL,
+                'postcode' TEXT NOT NULL,
+                'latitude' REAL,
+                'longitude' REAL)'''
+            )
+
+    # insert data, inc raw address
     c.execute('SELECT EXISTS (SELECT 1 FROM stations)')
     exists_stations = c.fetchone()[0]
     
-    if (exists_stations == 0):
-        stations = ref_data['stations']['items']
-        c.executemany('''
-            INSERT INTO stations
-                (brand, code, name, address, latitude, longitude)
-            VALUES
-                (:brand, :code, :name, :address, :latitude, :longitude)''', stations)
+    stations = ref_data['stations']['items']
     
+    if (exists_stations == 0):
+        for station in stations:
+            postcode = station['address'][-4:]
+            reversed = station['address'][::-1]
+            suburbrev = re.search('N (.*?),',reversed)
+            suburb = suburbrev.group(1)[::-1]
+            c.execute('''
+                INSERT INTO stations
+                    (brand, code, name, address, suburb, postcode, latitude, longitude)
+                VALUES
+                    (?,?,?,?,?,?,?,?)''', 
+                    (station['brand'], station['code'], station['name'], station['address'], suburb, postcode, station['location']['latitude'], station['location']['longitude'])
+                )
 
     conn.commit()
-
-
+    
 
 
     ## Close reference.json file! 
