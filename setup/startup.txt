@@ -1,0 +1,33 @@
+export API_KEY=AIzaSyCSkN5aUjVSybjNwlFIX7yVsB3pYe3Bl_4
+export FLASK_APP=application.py
+export FUEL_KEY=2SeFzEBklYy8HGNfK4H7yMOKHpGNfGw5
+export FUEL_AUTH=R4m1A0KsClGnVKKIXraCXMRzzO9K
+flask run
+
+
+
+Fuel b64 encoded 
+MlNlRnpFQmtsWXk4SEdOZks0SDd5TU9LSHBHTmZHdzU6dHdCQ2x4dUo3NGtBZlNyYQ==
+
+  "refresh_token_expires_in": "0",
+  "api_product_list": "[Fuel Check Portal Api]",
+  "api_product_list_json": [
+    "Fuel Check Portal Api"
+  ],
+  "organization_name": "onegov",
+  "developer.email": "garethlvjones@gmail.com",
+  "token_type": "BearerToken",
+  "issued_at": "1502260687641",
+  "client_id": "2SeFzEBklYy8HGNfK4H7yMOKHpGNfGw5",
+  "access_token": "R4m1A0KsClGnVKKIXraCXMRzzO9K",
+  "application_name": "f55cb358-d200-4c18-ad73-83f0b729ed44",
+  "scope": "",
+  "expires_in": "43199",
+  "refresh_count": "0",
+  "status": "approved"
+
+  dd/MM/yyyy hh:mm:ss AM/PM"
+  
+  
+  curl -X GET --header "apikey: 2SeFzEBklYy8HGNfK4H7yMOKHpGNfGw5" --header "transactionid: 234" --header "requesttimestamp: 2017-08-09T07:02:49+0000" --header "Authorization: Bearer R4m1A0KsClGnVKKIXraCXMRzzO9K" --header "Content-Type: application/json; charset=utf-8" "https://api.onegov.nsw.gov.au/FuelPriceCheck/v1/fuel/prices/new"
+  
