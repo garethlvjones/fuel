@@ -28,60 +28,11 @@ def index():
     if not os.environ.get("API_KEY"):
         raise RuntimeError("API_KEY not set")
     return render_template("index.html", key=os.environ.get("API_KEY"))
-    
-    
-    
+
 
 @app.route("/fuel")
 def fuel():
-    """Look up prices for fuel"""
-    if not os.environ.get("FUEL_KEY"):
-        raise RuntimeError("FUEL_KEY not set")
-    elif not os.environ.get("FUEL_AUTH"):
-        raise RuntimeError("FUEL_AUTH not set")
-    
-    # url form is fuel?q=blah
-    
-    # fuel_key = os.environ.get("FUEL_KEY")
-    # fuel_auth = os.environ.get("FUEL_AUTH")
-    url = 'https://api.onegov.nsw.gov.au/FuelPriceCheck/v1/fuel/prices/station/1'
-    
-    headers = {
-    'content-type': "application/json",
-    'apikey': "2SeFzEBklYy8HGNfK4H7yMOKHpGNfGw5",
-    'authorization': "Bearer R4m1A0KsClGnVKKIXraCXMRzzO9K",
-    'transactionid': "123",
-    'requesttimestamp': "24/06/2015 03:10:22 am",
-    'cache-control': "no-cache",
-    }
-
-response = requests.request("GET", url, headers=headers)
-
-print(response.text)
-
-    r = requests.get(url, headers=headers)
-    
-    if (r.status_code == requests.codes.ok):
-        print (r.json())
-
-    
-    return render_template("fuel.html")
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+   return render_template("fuel.html")
     
 
 @app.route("/articles")

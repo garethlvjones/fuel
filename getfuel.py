@@ -5,6 +5,7 @@ import re
 import requests
 import json
 import sqlite3
+import time
 
 
 """ AIMS:
@@ -18,12 +19,53 @@ import sqlite3
 def main():
     
                                                     ## 1. Get Data, store in file
+    
     # open reference.json for writing
     # get reference from api.gov
     # pipe input to reference.json
     
-    ### TO DO TO DO ###
-    # use manual file to start with. This isn't too hard - do the hard db stuff first
+    """Look up prices for fuel
+    if not os.environ.get("FUEL_KEY"):
+        raise RuntimeError("FUEL_KEY not set")
+    elif not os.environ.get("FUEL_AUTH"):
+        raise RuntimeError("FUEL_AUTH not set")
+    """
+    
+    fuel_key = "2SeFzEBklYy8HGNfK4H7yMOKHpGNfGw5"
+    fuel_auth = "Bearer eZ1aLPua9jd4WztJiPjphJcEuPPP"
+    time_format = time.strftime("%d/%m/%Y %H:%M:%S %p")
+    transaction_id = str(int(time.time()))
+    
+    print(fuel_auth)
+    
+    # get all fuel prices
+    getallfuelurl = 'https://api.onegov.nsw.gov.au/FuelPriceCheck/v1/fuel/prices'
+    
+    headers = {
+    'content-type': "application/json; charset=utf-8",
+    'apikey': fuel_key,
+    'authorization': fuel_auth,
+    'transactionid': transaction_id,
+    'requesttimestamp': time_format,
+    'cache-control': "no-cache",
+    }
+    
+    response = requests.get(getallfuelurl, headers=headers)
+    
+    if (response.status_code == requests.codes.ok):
+        allfuel = response.json()
+    else:
+        response.raise_for_status()
+
+    """ 
+    to do here: 
+    # get reference.json from api call
+    # update reference.json file
+    # put allfuel in to data/allfuel.json
+    # insert allfuel.json in to db, using 'code' to update
+    # update last_update field in DB
+    """    
+        
     
                                                     ## 2. Create/open DB, open file, add data to tables
     
@@ -89,8 +131,8 @@ def main():
                 'suburb' TEXT NOT NULL,
                 'postcode' TEXT NOT NULL,
                 'latitude' REAL,
-                'longitude' REAL)'''
-            )
+                'longitude' REAL,
+                'current_price' INTEGER)''')
 
     # insert data, inc raw address
     c.execute('SELECT EXISTS (SELECT 1 FROM stations)')

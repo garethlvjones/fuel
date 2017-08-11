@@ -1,7 +1,7 @@
 export API_KEY=AIzaSyCSkN5aUjVSybjNwlFIX7yVsB3pYe3Bl_4
 export FLASK_APP=application.py
 export FUEL_KEY=2SeFzEBklYy8HGNfK4H7yMOKHpGNfGw5
-export FUEL_AUTH=R4m1A0KsClGnVKKIXraCXMRzzO9K
+export FUEL_AUTH=eZ1aLPua9jd4WztJiPjphJcEuPPP
 flask run
 
 
