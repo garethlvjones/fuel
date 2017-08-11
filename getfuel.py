@@ -1,61 +1,128 @@
 #!/usr/bin/python3
 
-import os
 import re
-import requests
 import json
 import sqlite3
-import time
-
-
-""" AIMS:
-- Get full dataset once, inset into DB
-    - split dataset addresses for suburb, postcode
-- Hourly check for change since [last check]
-- poss calc best day, 7 day chart, etc
-"""
+from helpers import *
 
 ### MAIN ###
 def main():
     
+    """
+    1. Does DB Exsist
+        - n. create
+    
+    2. Do tables exist (brands, fueltypes, stations, prices)
+        - n. create empty
+    
+    3. Do tables have data
+        - n. run get reference, run get fuel only if needed
+        3.1 add data to DB
+        """
+    
+    ## 1. Does DB exist
+    # check database to see if it exists (create if it doesn't)
+    try:
+        conn = sqlite3.connect('fuel.db')
+    except sqlite3.Error:
+        print ("Error opening db.\n")
+        return False
+    
+    # make var to use to do db stuff
+    c = conn.cursor()
+    
+    ## 2. Create tables if they don't exist already (brands, fueltypes, stations)
+    c.execute('''CREATE TABLE IF NOT EXISTS brands
+    ('name' TEXT NOT NULL, 'id' INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL)''')
+    
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS 
+            fueltypes (
+                'code' TEXT PRIMARY KEY NOT NULL, 
+                'name' TEXT NOT NULL)''')
+    
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS 
+            stations (
+                'brand' TEXT NOT NULL, 
+                'code' INTEGER PRIMARY KEY,
+                'name' TEXT NOT NULL,
+                'address' TEXT NOT NULL,
+                'suburb' TEXT NOT NULL,
+                'postcode' TEXT NOT NULL,
+                'latitude' REAL,
+                'longitude' REAL,
+                'last_updated' DATETIME
+            )''')
+            
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS 
+            prices (
+                'code' INTEGER NOT NULL PRIMARY KEY, 
+                '
+            )''')
+            
+    ## 3. Do tables have data already
+    c.execute('SELECT EXISTS (SELECT 1 FROM brands)')
+    exists_brands = c.fetchone()[0]
+    
+    c.execute('SELECT EXISTS (SELECT 1 FROM fueltypes)')
+    exists_fueltypes = c.fetchone()[0]
+    
+    c.execute('SELECT EXISTS (SELECT 1 FROM stations)')
+    exists_stations = c.fetchone()[0]
+    
+    if (exists_brands == 0 || exists_fueltypes == 0):
+        ref_data = get_reference_data()             # get reference data from gov.api
+        
+        fueltypes = ref_data['fueltypes']['items']  # insert data into table fueltypes
+        c.executemany('''
+            INSERT INTO fueltypes
+                (code, name)
+            VALUES
+                (:code, :name)''', fueltypes)
+                
+        brands = ref_data['brands']['items']        # insert data into table brands
+        for item in brands:
+            for val in list(item.values()):
+                c.execute('INSERT INTO brands (name) VALUES (?)', [val])
+        
+                
+    if (exists_stations == 0):
+        fuel_data = get_all_fuel_prices()            # get current prices from gov.api
+        stations = fuel_data['stations']
+        prices = fuel_data['prices']
+        
+        for station in stations:                    # add station data to station table
+            postcode = station['address'][-4:]
+            reversed = station['address'][::-1]
+            suburbrev = re.search('N (.*?),',reversed)
+            suburb = suburbrev.group(1)[::-1]
+            c.execute('''
+                INSERT INTO stations
+                    (brand, code, name, address, suburb, postcode, latitude, longitude)
+                VALUES
+                    (?,?,?,?,?,?,?,?)''', 
+                    (station['brand'], station['code'], station['name'], station['address'], \
+                     suburb, postcode, station['location']['latitude'], station['location']['longitude'])
+                )
+        
+        for prices in stations:                     # add price data to prices table
+    
+    
                                                     ## 1. Get Data, store in file
     
-    # open reference.json for writing
-    # get reference from api.gov
-    # pipe input to reference.json
+
+    # get all fuel prices
+    all_fuel = get_all_fuel_prices()
+
     
-    """Look up prices for fuel
-    if not os.environ.get("FUEL_KEY"):
-        raise RuntimeError("FUEL_KEY not set")
-    elif not os.environ.get("FUEL_AUTH"):
-        raise RuntimeError("FUEL_AUTH not set")
+    """
+    get_reference_data()
+    update_reference_data()
+    update_fuel_prices()
     """
     
-    fuel_key = "2SeFzEBklYy8HGNfK4H7yMOKHpGNfGw5"
-    fuel_auth = "Bearer eZ1aLPua9jd4WztJiPjphJcEuPPP"
-    time_format = time.strftime("%d/%m/%Y %H:%M:%S %p")
-    transaction_id = str(int(time.time()))
-    
-    print(fuel_auth)
-    
-    # get all fuel prices
-    getallfuelurl = 'https://api.onegov.nsw.gov.au/FuelPriceCheck/v1/fuel/prices'
-    
-    headers = {
-    'content-type': "application/json; charset=utf-8",
-    'apikey': fuel_key,
-    'authorization': fuel_auth,
-    'transactionid': transaction_id,
-    'requesttimestamp': time_format,
-    'cache-control': "no-cache",
-    }
-    
-    response = requests.get(getallfuelurl, headers=headers)
-    
-    if (response.status_code == requests.codes.ok):
-        allfuel = response.json()
-    else:
-        response.raise_for_status()
 
     """ 
     to do here: 
@@ -69,14 +136,7 @@ def main():
     
                                                     ## 2. Create/open DB, open file, add data to tables
     
-    # Create or open database
-    # https://docs.python.org/3.6/library/sqlite3.html
-    try:
-        conn = sqlite3.connect('fuel.db')
-    except sqlite3.Error:
-        print ("Error opening db.\n")
-        return False
-        
+
     # make var to use to do db stuff
     c = conn.cursor()
     
