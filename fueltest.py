@@ -8,15 +8,18 @@ from helpers import *
 def main():
     
     # load up json file
-    fuel_data = json.load(open('data/fuel.json'))
+    station_data = open('data/fuel2.json')
     
-    stations = fuel_data['stations']
-    prices = fuel_data['prices']
-    
+    x = json.load(station_data)
     
     
-    for prices in stations:
-        # everything with ID match
+    with open('data/fuel.json', 'w') as f:                  # we know that file doens't exist yet
+        # f.write(station_data)
+        json.dump(x, f, indent=4)                           # write to file the json object
+    
+
+
+
 
 
 if __name__ == "__main__":
